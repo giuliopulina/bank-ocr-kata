@@ -1,7 +1,5 @@
 package link.giuliopulina.bankocr;
 
-import link.giuliopulina.bankocr.writer.Writer;
-
 import java.util.List;
 
 public class AccountNumber {
@@ -12,32 +10,26 @@ public class AccountNumber {
         this.digits = digits;
     }
 
-    public boolean hasErrors() {
-        return !hasAllValidDigits() || ! hasValidChecksum();
-    }
-
-    public boolean hasAllValidDigits() {
-        return digits.stream().allMatch(AccountNumberDigit::isValid);
+    public boolean hasAllReadableDigits() {
+        return digits.stream().allMatch(AccountNumberDigit::isReadable);
     }
 
     public boolean hasValidChecksum() {
         long weight = 9;
         long checksum = 0;
 
-        if (!hasAllValidDigits()) {
+        if (!hasAllReadableDigits()) {
             return false;
         }
 
         for (AccountNumberDigit digit : digits) {
-            checksum += ((ValidAccountNumberDigit) digit).getDigit() * weight--;
+            checksum += ((ReadableAccountNumberDigit) digit).getDigit() * weight--;
         }
 
         return checksum % 11 == 0;
     }
 
-    public String write(Writer writer) {
-        return writer.writeDigits(digits);
+    public List<AccountNumberDigit> getDigits() {
+        return digits;
     }
-
-
 }

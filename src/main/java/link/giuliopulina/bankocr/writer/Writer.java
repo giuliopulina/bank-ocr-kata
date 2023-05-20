@@ -1,28 +1,28 @@
 package link.giuliopulina.bankocr.writer;
 
-import link.giuliopulina.bankocr.AccountNumber;
-import link.giuliopulina.bankocr.AccountNumberDigit;
-import link.giuliopulina.bankocr.ValidAccountNumberDigit;
+import link.giuliopulina.bankocr.*;
 
 import java.util.List;
 
 public class Writer {
-    private final List<AccountNumber> accountNumbers;
+    private final AccountNumbers accountNumbers;
 
-    public Writer(List<AccountNumber> accountNumbers) {
+    public Writer(AccountNumbers accountNumbers) {
         this.accountNumbers = accountNumbers;
     }
 
     public List<String> write() {
-        return accountNumbers.stream().map(accountNumber -> {
+        return accountNumbers.getEvaluatedAccountNumbers().stream().map(accountNumber -> {
 
             String result = accountNumber.write(this);
-            if (!accountNumber.hasAllValidDigits()) {
+            if (accountNumber.getStatus() == EvaluatedAccountNumber.Status.UNREADABLE) {
                 result += " ILL";
-            } else if (!accountNumber.hasValidChecksum()) {
+            } else if (accountNumber.getStatus() == EvaluatedAccountNumber.Status.INVALID_CHECKSUM) {
                 result += " ERR";
             }
-
+            else if (accountNumber.getStatus() == EvaluatedAccountNumber.Status.AMBIGUOUS) {
+                result += " AMB";
+            }
             return result;
         }).toList();
     }
@@ -30,8 +30,8 @@ public class Writer {
     public String writeDigits(List<AccountNumberDigit> digits) {
         String result = "";
         for (AccountNumberDigit accountNumberDigit : digits) {
-            if (accountNumberDigit.isValid()) {
-                result += ((ValidAccountNumberDigit)accountNumberDigit).getDigit();
+            if (accountNumberDigit.isReadable()) {
+                result += ((ReadableAccountNumberDigit)accountNumberDigit).getDigit();
             }
             else {
                 result += "?";

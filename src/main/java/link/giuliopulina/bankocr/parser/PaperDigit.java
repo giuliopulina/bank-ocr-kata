@@ -26,12 +26,12 @@ public enum PaperDigit {
         this.digitValue = digitValue;
     }
 
-    Integer digitValue() {
+    public Integer digitValue() {
         return digitValue;
     }
 
 
-    static Optional<PaperDigit> fromPattern(String pattern) {
+    public static Optional<PaperDigit> fromPattern(String pattern) {
         for (PaperDigit element : PaperDigit.values()) {
             if (pattern.equals(element.pattern)) {
                 return of(element);

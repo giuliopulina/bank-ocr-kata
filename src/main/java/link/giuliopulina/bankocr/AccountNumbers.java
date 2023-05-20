@@ -1,16 +1,62 @@
 package link.giuliopulina.bankocr;
 
+import link.giuliopulina.bankocr.collector.ReadableAlternativesCollector;
+import link.giuliopulina.bankocr.collector.ValidChecksumAlternativesCollector;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountNumbers {
 
-    /*public static List<AccountNumber> buildWithAlternatives(List<AccountNumber> accountNumbers) {
-        for (AccountNumber accountNumber : accountNumbers) {
-            if (accountNumber.hasErrors()) {
-                final List<AccountNumber> alternatives = new ArrayList<>();
 
+    private final List<EvaluatedAccountNumber> evaluatedAccountNumbers;
+
+    AccountNumbers(List<EvaluatedAccountNumber> evaluatedAccountNumbers) {
+        this.evaluatedAccountNumbers = evaluatedAccountNumbers;
+    }
+
+    //TODO: review the algorithm because it seems to me that something is not correct
+    // "fixed" number shouldn't be replaced by the
+    public static AccountNumbers from(List<AccountNumber> accountNumbers) {
+
+        final List<EvaluatedAccountNumber> result = new ArrayList<>();
+
+        for (AccountNumber originalAccountNumber : accountNumbers) {
+            List<AccountNumber> readableAccountNumbers = findReadableAlternatives(originalAccountNumber);
+
+            if (readableAccountNumbers.size() == 0) {
+                result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.UNREADABLE));
+            }
+            else {
+                List<AccountNumber> validAccountNumbers = findValidChecksumAlternatives(readableAccountNumbers);
+                if (validAccountNumbers.isEmpty()) {
+                    result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.INVALID_CHECKSUM));
+                } else if (validAccountNumbers.size() == 1){
+                    result.add(new EvaluatedAccountNumber(validAccountNumbers.get(0), EvaluatedAccountNumber.Status.VALID));
+                }
+                else {
+                    result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.AMBIGUOUS));
+                }
             }
         }
-    }*/
+
+        return new AccountNumbers(result);
+    }
+
+    private static List<AccountNumber> findReadableAlternatives(AccountNumber originalAccountNumber) {
+        return new ReadableAlternativesCollector().collect(originalAccountNumber);
+    }
+
+    private static List<AccountNumber> findValidChecksumAlternatives(List<AccountNumber> readableAccountNumbers) {
+        final List<AccountNumber> validAlternatives = new ArrayList<>();
+        readableAccountNumbers.forEach(accountNumber -> {
+            validAlternatives.addAll(new ValidChecksumAlternativesCollector().collect(accountNumber));
+        });
+
+        return validAlternatives;
+    }
+
+    public List<EvaluatedAccountNumber> getEvaluatedAccountNumbers() {
+        return evaluatedAccountNumbers;
+    }
 }

@@ -4,7 +4,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-public class PaperDigitsAlternatives {
+public class ValidPaperDigitsAlternatives {
 
     private static Map<PaperDigit, List<PaperDigit>> ALTERNATIVES_MAP = Map.ofEntries(
             new AbstractMap.SimpleEntry<>(PaperDigit.NINE, Collections.singletonList(PaperDigit.EIGHT)),
