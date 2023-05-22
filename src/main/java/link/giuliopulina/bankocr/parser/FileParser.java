@@ -21,15 +21,22 @@ public class FileParser {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
 
             int count = 0;
+            int row = 0;
             final List<String> accountNumberLinearized = new ArrayList<>(9);
 
             while (fileReader.ready()) {
                 final String line = fileReader.readLine();
+
                 if (count == DIGIT_NUMBER_OF_ROWS_OCCUPIED) {
                     count = 0;
                     accountNumbers.add(AccountNumberParser.fromString(accountNumberLinearized));
                     accountNumberLinearized.clear();
                 } else {
+
+                    if (line.length() < NUMBER_OF_DIGITS * DIGIT_NUMBER_OF_COLUMNS_OCCUPIED) {
+                        throw new IllegalArgumentException("Found row " + row + " with " + line.length() + " chars, it must have a length of " + NUMBER_OF_DIGITS * DIGIT_NUMBER_OF_COLUMNS_OCCUPIED + " chars");
+                    }
+
                     for (int i = 0; i < NUMBER_OF_DIGITS; i += 1) {
                         final int startPosition = i * DIGIT_NUMBER_OF_COLUMNS_OCCUPIED;
                         final String token = line.substring(startPosition, startPosition + DIGIT_NUMBER_OF_COLUMNS_OCCUPIED);
@@ -44,6 +51,7 @@ public class FileParser {
                     count++;
                 }
 
+                row++;
             }
         }
 

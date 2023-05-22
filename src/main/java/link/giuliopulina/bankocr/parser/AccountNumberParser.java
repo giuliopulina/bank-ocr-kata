@@ -15,8 +15,7 @@ public class AccountNumberParser {
             Optional<PaperDigit> value = PaperDigit.fromPattern(pattern);
             if (value.isPresent()) {
                 final PaperDigit paperDigit = value.get();
-                final List<PaperDigit> alternatives = ValidPaperDigitsAlternatives.alternativesFor(paperDigit);
-                return ReadableAccountNumberDigit.createWithAlternatives(paperDigit.digitValue(), alternatives.stream().map(PaperDigit::digitValue).toList());
+                return new ReadableAccountNumberDigit(paperDigit.digitValue(), pattern);
             }
             else {
                 return new UnreadableAccountNumberDigit(pattern);

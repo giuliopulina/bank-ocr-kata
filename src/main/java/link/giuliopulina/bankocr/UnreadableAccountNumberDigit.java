@@ -1,19 +1,20 @@
 package link.giuliopulina.bankocr;
 
-public class UnreadableAccountNumberDigit implements AccountNumberDigit {
-
-    final String pattern;
+public class UnreadableAccountNumberDigit extends AccountNumberDigit {
 
     public UnreadableAccountNumberDigit(String pattern) {
-        this.pattern = pattern;
+        super(pattern);
+        readable = false;
     }
 
     @Override
-    public boolean isReadable() {
+    public boolean hasBeenCorrected() {
         return false;
     }
 
-    public String getPattern() {
-        return pattern;
+    @Override
+    public String toString() {
+        return getPattern();
     }
+
 }

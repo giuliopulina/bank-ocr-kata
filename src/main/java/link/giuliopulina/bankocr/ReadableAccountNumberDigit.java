@@ -1,42 +1,38 @@
 package link.giuliopulina.bankocr;
 
-import java.util.ArrayList;
-import java.util.List;
+import static link.giuliopulina.bankocr.ReadableAccountNumberDigit.Status.CORRECTED;
+import static link.giuliopulina.bankocr.ReadableAccountNumberDigit.Status.UNTOUCHED;
 
-public class ReadableAccountNumberDigit implements AccountNumberDigit {
+public class ReadableAccountNumberDigit extends AccountNumberDigit {
 
     private final Integer digit;
-    private List<ReadableAccountNumberDigit> alternatives = new ArrayList<>();
+    private Status status = UNTOUCHED;
 
-    public ReadableAccountNumberDigit(Integer digit) {
+    public ReadableAccountNumberDigit(Integer digit, String pattern) {
+        super(pattern);
         this.digit = digit;
+        this.readable = true;
     }
 
-    private ReadableAccountNumberDigit(Integer digit, List<Integer> alternatives) {
-        this.digit = digit;
-        this.alternatives = alternatives.stream().map(ReadableAccountNumberDigit::new).toList();
-    }
-
-    public static ReadableAccountNumberDigit createWithoutAlternatives(Integer digit) {
-        return new ReadableAccountNumberDigit(digit);
-    }
-
-    public static ReadableAccountNumberDigit createWithAlternatives(Integer digit, List<Integer> alternatives) {
-        return new ReadableAccountNumberDigit(digit, alternatives);
-    }
-
-    @Override
-    public boolean isReadable() {
-        return true;
+    public ReadableAccountNumberDigit(Integer digit, String pattern, Status status) {
+        this(digit, pattern);
+        this.status = status;
     }
 
     public Integer getDigit() {
         return digit;
     }
 
-    public List<ReadableAccountNumberDigit> getAlternatives() {
-        return alternatives;
+    public boolean hasBeenCorrected() {
+        return status == CORRECTED;
     }
 
+    @Override
+    public String toString() {
+        return ""+digit;
+    }
 
+    public enum Status {
+        UNTOUCHED, CORRECTED
+    }
 }

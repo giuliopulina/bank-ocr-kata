@@ -20,21 +20,36 @@ public class AccountNumberTest {
     }
 
     @Test
-    public void testInvalidChecksum() throws IOException {
-        final File file = loadInputFile("simple_invalid_checksum.txt");
+    public void shouldNotFindAnyReadableAlternative() throws IOException {
+        final File file = loadInputFile("file_with_one_illegible_unresolvable_account_number.txt");
         AccountNumbers accountNumbers = AccountNumbers.from(FileParser.parse(file));
         List<String> result = new Writer(accountNumbers).write();
-        assertEquals("123456788 ERR", result.get(0));
-        assertEquals("183856710 ERR", result.get(1));
+        assertEquals("?222?2222 ILL", result.get(0));
+        System.out.println(result);
     }
 
     @Test
-    public void testUnreadableDigits() throws IOException {
-        final File file = loadInputFile("simple_invalid_parsed_digits.txt");
+    public void shouldFindOneValidAlternativeFromAnUnreadableInput() throws IOException {
+        final File file = loadInputFile("file_with_one_illegible_resolvable_account_number.txt");
         AccountNumbers accountNumbers = AccountNumbers.from(FileParser.parse(file));
         List<String> result = new Writer(accountNumbers).write();
-        assertEquals("1234567?8 ILL", result.get(0));
-        assertEquals("??3856710 ILL", result.get(1));
+        assertEquals("424492245", result.get(0));
+    }
+
+    @Test
+    public void shouldNotFindAnyValidAlternativeFromAnInputWithInvalidChecksum() throws IOException {
+        final File file = loadInputFile("file_with_one_error_unresolvable_account_number.txt");
+        AccountNumbers accountNumbers = AccountNumbers.from(FileParser.parse(file));
+        List<String> result = new Writer(accountNumbers).write();
+        assertEquals("424402240 ERR", result.get(0));
+    }
+
+    @Test
+    public void shouldFindOneValidAlternativeFromAnInputWithInvalidChecksum() throws IOException {
+        final File file = loadInputFile("file_with_one_error_resolvable_account_number.txt");
+        AccountNumbers accountNumbers = AccountNumbers.from(FileParser.parse(file));
+        List<String> result = new Writer(accountNumbers).write();
+        assertEquals("244224226", result.get(0));
     }
 
     private File loadInputFile(String path) {

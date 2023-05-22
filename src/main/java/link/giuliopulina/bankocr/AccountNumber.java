@@ -32,4 +32,11 @@ public class AccountNumber {
     public List<AccountNumberDigit> getDigits() {
         return digits;
     }
+
+    @Override
+    public String toString() {
+        return "AccountNumber{" +
+                "digits=" + digits +
+                '}';
+    }
 }

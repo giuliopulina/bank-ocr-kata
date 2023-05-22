@@ -15,8 +15,6 @@ public class AccountNumbers {
         this.evaluatedAccountNumbers = evaluatedAccountNumbers;
     }
 
-    //TODO: review the algorithm because it seems to me that something is not correct
-    // "fixed" number shouldn't be replaced by the
     public static AccountNumbers from(List<AccountNumber> accountNumbers) {
 
         final List<EvaluatedAccountNumber> result = new ArrayList<>();

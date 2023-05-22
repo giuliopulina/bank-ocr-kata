@@ -1,7 +1,24 @@
 package link.giuliopulina.bankocr;
 
-public interface AccountNumberDigit {
+public abstract class AccountNumberDigit {
 
-    boolean isReadable();
+    private final String pattern;
+
+    protected boolean readable;
+
+    AccountNumberDigit(String pattern) {
+        this.pattern = pattern;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public boolean isReadable() {
+        return readable;
+    }
+
+    public abstract boolean hasBeenCorrected();
+
 
 }
