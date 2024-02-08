@@ -2,12 +2,13 @@ package net.giuliopulina.bankocr;
 
 import net.giuliopulina.bankocr.parser.PaperDigit;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class OcrErrorCorrector {
     private final AccountNumber accountNumber;
+
+    // not thread-safe, but the current implementation guarantees that there is no concurrent access on this map
+    private static final Map<AccountNumberDigit, List<AccountNumberDigit>> cache = new HashMap<>();
 
     public OcrErrorCorrector(AccountNumber accountNumber) {
         this.accountNumber = accountNumber;
@@ -34,21 +35,25 @@ public class OcrErrorCorrector {
 
     private static List<AccountNumberDigit> findPossibleSourceDigits(AccountNumberDigit accountNumberDigit) {
 
-        final List<AccountNumberDigit> possibleSourceDigits = new ArrayList<>();
-        final String pattern = accountNumberDigit.getPattern();
+        cache.computeIfAbsent(accountNumberDigit, key -> {
+            final List<AccountNumberDigit> possibleSourceDigits = new ArrayList<>();
+            final String pattern = key.getPattern();
 
-        char[] charArray = pattern.toCharArray();
-        for (int i = 0; i < charArray.length; i++) {
-            char character = charArray[i];
-            if (character == ' ') {
-                addIfValidPattern(possibleSourceDigits, replaceCharInPatternAt(pattern, '|', i));
-                addIfValidPattern(possibleSourceDigits, replaceCharInPatternAt(pattern, '_', i));
-            } else if (character == '_' || character == '|') {
-                addIfValidPattern(possibleSourceDigits, replaceCharInPatternAt(pattern, ' ', i));
+            char[] charArray = pattern.toCharArray();
+            for (int i = 0; i < charArray.length; i++) {
+                char character = charArray[i];
+                if (character == ' ') {
+                    addIfValidPattern(possibleSourceDigits, replaceCharInPatternAt(pattern, '|', i));
+                    addIfValidPattern(possibleSourceDigits, replaceCharInPatternAt(pattern, '_', i));
+                } else if (character == '_' || character == '|') {
+                    addIfValidPattern(possibleSourceDigits, replaceCharInPatternAt(pattern, ' ', i));
+                }
             }
-        }
 
-        return possibleSourceDigits;
+            return possibleSourceDigits;
+        });
+
+        return cache.get(accountNumberDigit);
 
     }
 
