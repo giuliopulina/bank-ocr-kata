@@ -22,17 +22,13 @@ public class AccountNumber {
     }
 
     public boolean isValid() {
-        return isReadable() && hasValidChecksum();
+        return checksum.valid();
     }
 
     private boolean isReadable() {
         return digits.stream().allMatch(AccountNumberDigit::isReadable);
     }
-
-    private boolean hasValidChecksum() {
-        return checksum.valid();
-    }
-
+    
     private Checksum calculateChecksum() {
         long weight = 9;
         long checksum = 0;
