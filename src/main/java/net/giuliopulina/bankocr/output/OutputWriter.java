@@ -1,9 +1,6 @@
 package net.giuliopulina.bankocr.output;
 
-import net.giuliopulina.bankocr.AccountNumberDigit;
-import net.giuliopulina.bankocr.AccountNumbers;
-import net.giuliopulina.bankocr.EvaluatedAccountNumber;
-import net.giuliopulina.bankocr.ReadableAccountNumberDigit;
+import net.giuliopulina.bankocr.*;
 
 import java.util.List;
 
@@ -16,31 +13,25 @@ public class OutputWriter {
 
     public List<String> write() {
         return accountNumbers.getEvaluatedAccountNumbers().stream().map(accountNumber -> {
-
             String result = accountNumber.write(this);
-            if (accountNumber.getStatus() == EvaluatedAccountNumber.Status.UNREADABLE) {
-                result += " ILL";
-            } else if (accountNumber.getStatus() == EvaluatedAccountNumber.Status.INVALID_CHECKSUM) {
-                result += " ERR";
-            }
-            else if (accountNumber.getStatus() == EvaluatedAccountNumber.Status.AMBIGUOUS) {
-                result += " AMB";
+            switch (accountNumber.getStatus()) {
+                case UNREADABLE -> result += " ILL";
+                case INVALID_CHECKSUM ->  result += " ERR";
+                case AMBIGUOUS -> result += " AMB";
             }
             return result;
         }).toList();
     }
 
     public String writeDigits(List<AccountNumberDigit> digits) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (AccountNumberDigit accountNumberDigit : digits) {
-            if (accountNumberDigit.isReadable()) {
-                result += ((ReadableAccountNumberDigit)accountNumberDigit).getDigit();
-            }
-            else {
-                result += "?";
+            switch (accountNumberDigit) {
+                case ReadableAccountNumberDigit readableDigit -> result.append(readableDigit.getDigit());
+                case UnreadableAccountNumberDigit unreadableDigit -> result.append("?");
             }
         }
 
-        return result;
+        return result.toString();
     }
 }

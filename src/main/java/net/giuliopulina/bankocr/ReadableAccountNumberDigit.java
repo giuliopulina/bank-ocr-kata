@@ -1,6 +1,6 @@
 package net.giuliopulina.bankocr;
 
-public class ReadableAccountNumberDigit extends AccountNumberDigit {
+public final class ReadableAccountNumberDigit extends AccountNumberDigit {
 
     private final Integer digit;
 

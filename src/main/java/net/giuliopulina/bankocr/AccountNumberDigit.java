@@ -2,7 +2,7 @@ package net.giuliopulina.bankocr;
 
 import java.util.Objects;
 
-public abstract class AccountNumberDigit {
+public sealed abstract class AccountNumberDigit permits ReadableAccountNumberDigit, UnreadableAccountNumberDigit {
 
     private final String pattern;
 
