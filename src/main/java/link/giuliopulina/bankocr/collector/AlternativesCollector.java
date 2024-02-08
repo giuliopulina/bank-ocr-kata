@@ -9,54 +9,66 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Stream.concat;
 
-public abstract class AlternativesCollector<T extends AccountNumberDigit> {
+public class AlternativesCollector<T extends AccountNumberDigit> {
 
-    public List<AccountNumber> collect(AccountNumber accountNumber) {
-        if (shouldSearchForAlternatives(accountNumber)) {
-            List<AccountNumber> combinations = Collections.unmodifiableList(new ArrayList<>());
-            for (AccountNumberDigit digit : accountNumber.getDigits()) {
-                final List<AccountNumber> newCombinations = new ArrayList<>();
-                List<? extends AccountNumberDigit> possibleDigits = expandDigitsFrom(digit);
-                if (possibleDigits.isEmpty()) {
-                    possibleDigits = singletonList(digit);
-                }
+    public List<AccountNumber> findFor(AccountNumber accountNumber) {
 
-                if (combinations.isEmpty()) {
-                    for (AccountNumberDigit alternativeDigit : possibleDigits) {
-                        newCombinations.add(new AccountNumber(singletonList(alternativeDigit)));
-                    }
-                } else {
-                    for (AccountNumberDigit alternativeDigit : possibleDigits) {
-                        combinations.forEach(comb -> newCombinations.add(new AccountNumber(concat(comb.getDigits().stream(), Stream.of(alternativeDigit)).toList())));
-                    }
-                }
-
-                combinations = newCombinations;
+        if (!accountNumber.hasAllReadableDigits()) {
+            List<AccountNumber> validAccountNumbers = process(accountNumber, digit -> !digit.isReadable());
+            if (validAccountNumbers.size() == 1) {
+                return validAccountNumbers;
             }
-            return filterResult(combinations);
         }
 
-        return singletonList(accountNumber);
+        return process(accountNumber, digit -> true);
+    }
+
+    private List<AccountNumber> process(AccountNumber accountNumber, Predicate<AccountNumberDigit> digitsToHandle) {
+        List<AccountNumber> combinations = Collections.unmodifiableList(new ArrayList<>());
+        for (AccountNumberDigit digit : accountNumber.getDigits()) {
+            final List<AccountNumber> newCombinations = new ArrayList<>();
+
+            List<? extends AccountNumberDigit> possibleDigits = singletonList(digit);
+            if (digitsToHandle.test(digit)) {
+                List<? extends AccountNumberDigit> alternatives = expandDigitsFrom(digit);
+                if (!alternatives.isEmpty()) {
+                    possibleDigits = expandDigitsFrom(digit);
+                }
+            }
+
+            if (combinations.isEmpty()) {
+                for (AccountNumberDigit alternativeDigit : possibleDigits) {
+                    newCombinations.add(new AccountNumber(singletonList(alternativeDigit)));
+                }
+            } else {
+                for (AccountNumberDigit alternativeDigit : possibleDigits) {
+                    combinations.forEach(comb -> newCombinations.add(new AccountNumber(concat(comb.getDigits().stream(), Stream.of(alternativeDigit)).toList())));
+                }
+            }
+
+            combinations = newCombinations;
+        }
+        return filterResult(combinations);
+    }
+
+    private List<AccountNumber> filterResult(List<AccountNumber> combinations) {
+        return combinations.stream().filter(AccountNumber::hasValidChecksum).toList();
     }
 
 
-    protected abstract boolean shouldSearchForAlternatives(AccountNumber accountNumber);
-
-    protected abstract List<AccountNumber> filterResult(List<AccountNumber> combinations);
-
     protected List<AccountNumberDigit> expandDigitsFrom(AccountNumberDigit accountNumberDigit) {
 
-        if (!shouldConsiderDigit(accountNumberDigit)) {
-            return emptyList();
+        List<AccountNumberDigit> alternatives = new ArrayList<>();
+        if (accountNumberDigit.isReadable()) {
+            alternatives.add(accountNumberDigit);
         }
 
-        List<AccountNumberDigit> alternatives = new ArrayList<>();
         final String pattern = accountNumberDigit.getPattern();
 
         char[] charArray = pattern.toCharArray();
@@ -84,7 +96,5 @@ public abstract class AlternativesCollector<T extends AccountNumberDigit> {
         Optional<PaperDigit> paperDigit = PaperDigit.fromPattern(pattern);
         paperDigit.ifPresent(digit -> alternatives.add(new ReadableAccountNumberDigit(digit.digitValue(), pattern, ReadableAccountNumberDigit.Status.CORRECTED)));
     }
-
-    protected abstract boolean shouldConsiderDigit(AccountNumberDigit digit);
 
 }

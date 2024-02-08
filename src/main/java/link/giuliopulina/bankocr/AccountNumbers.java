@@ -1,13 +1,11 @@
 package link.giuliopulina.bankocr;
 
-import link.giuliopulina.bankocr.collector.ReadableAlternativesCollector;
-import link.giuliopulina.bankocr.collector.ValidChecksumAlternativesCollector;
+import link.giuliopulina.bankocr.collector.AlternativesCollector;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountNumbers {
-
 
     private final List<EvaluatedAccountNumber> evaluatedAccountNumbers;
 
@@ -20,38 +18,23 @@ public class AccountNumbers {
         final List<EvaluatedAccountNumber> result = new ArrayList<>();
 
         for (AccountNumber originalAccountNumber : accountNumbers) {
-            List<AccountNumber> readableAccountNumbers = findReadableAlternatives(originalAccountNumber);
-
-            if (readableAccountNumbers.size() == 0) {
-                result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.UNREADABLE));
+            if (originalAccountNumber.hasValidChecksum()) {
+                result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.VALID));
+                continue;
             }
-            else {
-                List<AccountNumber> validAccountNumbers = findValidChecksumAlternatives(readableAccountNumbers);
-                if (validAccountNumbers.isEmpty()) {
-                    result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.INVALID_CHECKSUM));
-                } else if (validAccountNumbers.size() == 1){
-                    result.add(new EvaluatedAccountNumber(validAccountNumbers.get(0), EvaluatedAccountNumber.Status.VALID));
-                }
-                else {
-                    result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.AMBIGUOUS));
+
+            if (!originalAccountNumber.hasValidChecksum() || !originalAccountNumber.hasAllReadableDigits()) {
+                List<AccountNumber> validAlternatives = new AlternativesCollector<>().findFor(originalAccountNumber);
+
+                switch (validAlternatives.size()) {
+                    case 0 -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.INVALID_CHECKSUM));
+                    case 1 -> result.add(new EvaluatedAccountNumber(validAlternatives.get(0), EvaluatedAccountNumber.Status.VALID));
+                    default -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.AMBIGUOUS));
                 }
             }
         }
 
         return new AccountNumbers(result);
-    }
-
-    private static List<AccountNumber> findReadableAlternatives(AccountNumber originalAccountNumber) {
-        return new ReadableAlternativesCollector().collect(originalAccountNumber);
-    }
-
-    private static List<AccountNumber> findValidChecksumAlternatives(List<AccountNumber> readableAccountNumbers) {
-        final List<AccountNumber> validAlternatives = new ArrayList<>();
-        readableAccountNumbers.forEach(accountNumber -> {
-            validAlternatives.addAll(new ValidChecksumAlternativesCollector().collect(accountNumber));
-        });
-
-        return validAlternatives;
     }
 
     public List<EvaluatedAccountNumber> getEvaluatedAccountNumbers() {

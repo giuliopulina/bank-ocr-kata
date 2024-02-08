@@ -25,7 +25,7 @@ public class FileParser {
             final List<String> accountNumberLinearized = new ArrayList<>(9);
 
             while (fileReader.ready()) {
-                final String line = fileReader.readLine();
+                String line = fileReader.readLine();
 
                 if (count == DIGIT_NUMBER_OF_ROWS_OCCUPIED) {
                     count = 0;
@@ -34,7 +34,10 @@ public class FileParser {
                 } else {
 
                     if (line.length() < NUMBER_OF_DIGITS * DIGIT_NUMBER_OF_COLUMNS_OCCUPIED) {
-                        throw new IllegalArgumentException("Found row " + row + " with " + line.length() + " chars, it must have a length of " + NUMBER_OF_DIGITS * DIGIT_NUMBER_OF_COLUMNS_OCCUPIED + " chars");
+                        int lineLength = line.length();
+                        for (int i = 0; i < NUMBER_OF_DIGITS * DIGIT_NUMBER_OF_COLUMNS_OCCUPIED - lineLength; i++) {
+                            line += " ";
+                        }
                     }
 
                     for (int i = 0; i < NUMBER_OF_DIGITS; i += 1) {
