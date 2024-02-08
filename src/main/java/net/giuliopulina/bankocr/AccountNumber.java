@@ -28,7 +28,7 @@ public class AccountNumber {
     private boolean isReadable() {
         return digits.stream().allMatch(AccountNumberDigit::isReadable);
     }
-    
+
     private Checksum calculateChecksum() {
         long weight = 9;
         long checksum = 0;

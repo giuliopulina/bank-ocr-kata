@@ -31,7 +31,8 @@ public class AccountNumberTest {
                 "490067715 AMB",
                 "123456789",
                 "000000051",
-                "490867715"));
+                "490867715",
+                "?????1?1? ILL"));
     }
 
     private File loadInputFile(String path) {
