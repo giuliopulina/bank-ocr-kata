@@ -22,11 +22,11 @@ public class AccountNumbers {
             }
 
             final List<AccountNumber> alternatives = new OcrErrorCorrector(originalAccountNumber).accountNumbers();
-            final List<AccountNumber> validChecksumAlternatives = alternatives.stream().filter(AccountNumber::isValid).toList();
+            final List<AccountNumber> validAlternatives = alternatives.stream().filter(AccountNumber::isValid).toList();
 
-            switch (validChecksumAlternatives.size()) {
+            switch (validAlternatives.size()) {
                 case 0 -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.UNREADABLE));
-                case 1 -> result.add(new EvaluatedAccountNumber(validChecksumAlternatives.getFirst(), EvaluatedAccountNumber.Status.VALID));
+                case 1 -> result.add(new EvaluatedAccountNumber(validAlternatives.getFirst(), EvaluatedAccountNumber.Status.VALID));
                 default -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.AMBIGUOUS));
             }
 
