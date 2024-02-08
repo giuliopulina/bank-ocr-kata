@@ -16,20 +16,18 @@ public class AccountNumbers {
         final List<EvaluatedAccountNumber> result = new ArrayList<>();
 
         for (AccountNumber originalAccountNumber : accountNumbers) {
-            if (originalAccountNumber.hasValidChecksum()) {
+            if (originalAccountNumber.isValid()) {
                 result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.VALID));
                 continue;
             }
 
-            if (originalAccountNumber.isNotReadable() || !originalAccountNumber.hasValidChecksum()) {
-                List<AccountNumber> alternatives = new OcrErrorCorrector(originalAccountNumber).accountNumbers();
-                List<AccountNumber> validChecksumAlternatives = alternatives.stream().filter(AccountNumber::hasValidChecksum).toList();
+            final List<AccountNumber> alternatives = new OcrErrorCorrector(originalAccountNumber).accountNumbers();
+            final List<AccountNumber> validChecksumAlternatives = alternatives.stream().filter(AccountNumber::isValid).toList();
 
-                switch (validChecksumAlternatives.size()) {
-                    case 0 -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.UNREADABLE));
-                    case 1 -> result.add(new EvaluatedAccountNumber(validChecksumAlternatives.get(0), EvaluatedAccountNumber.Status.VALID));
-                    default -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.AMBIGUOUS));
-                }
+            switch (validChecksumAlternatives.size()) {
+                case 0 -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.UNREADABLE));
+                case 1 -> result.add(new EvaluatedAccountNumber(validChecksumAlternatives.getFirst(), EvaluatedAccountNumber.Status.VALID));
+                default -> result.add(new EvaluatedAccountNumber(originalAccountNumber, EvaluatedAccountNumber.Status.AMBIGUOUS));
             }
 
         }

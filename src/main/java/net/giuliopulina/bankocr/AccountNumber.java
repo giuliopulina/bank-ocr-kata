@@ -14,18 +14,22 @@ public class AccountNumber {
             throw new IllegalArgumentException("Account number must be composed of 9 digits, found " + digits.size() + " instead") ;
         }
 
-        if (isNotReadable()) {
-            checksum = new Checksum(false, -1);
-        } else {
+        if (isReadable()) {
             checksum = calculateChecksum();
+        } else {
+            checksum = new Checksum(false, -1);
         }
     }
 
-    public boolean isNotReadable() {
-        return !digits.stream().allMatch(AccountNumberDigit::isReadable);
+    public boolean isValid() {
+        return isReadable() && hasValidChecksum();
     }
 
-    public boolean hasValidChecksum() {
+    private boolean isReadable() {
+        return digits.stream().allMatch(AccountNumberDigit::isReadable);
+    }
+
+    private boolean hasValidChecksum() {
         return checksum.valid();
     }
 
