@@ -8,8 +8,8 @@ import static java.util.Optional.of;
 public enum PaperDigit {
 
     ZERO (" _ "+
-         "| |"+
-         "|_|", 0),
+          "| |"+
+          "|_|", 0),
 		 
     ONE  ("   " +
           "  |" +

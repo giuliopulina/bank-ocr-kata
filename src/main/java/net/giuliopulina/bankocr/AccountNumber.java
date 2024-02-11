@@ -4,6 +4,7 @@ import java.util.List;
 
 public class AccountNumber {
 
+    private static final Checksum INVALID_CHECKSUM = new Checksum(false, -1);
     private final List<AccountNumberDigit> digits;
     private final Checksum checksum;
 
@@ -17,7 +18,7 @@ public class AccountNumber {
         if (isReadable()) {
             checksum = calculateChecksum();
         } else {
-            checksum = new Checksum(false, -1);
+            checksum = INVALID_CHECKSUM;
         }
     }
 
